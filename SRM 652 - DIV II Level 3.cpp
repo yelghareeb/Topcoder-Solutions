@@ -43,23 +43,22 @@ public:
 
 vector <int> NoRightTurnDiv2::findPath(vector <int> x, vector <int> y) {
 	const double PI = atan2 (0,-2);
+	int second_point, visited[55], rem, prevx, prevy;
+	double min_angle=10, prev_angle=-1, angle=-1;
 	
 	vector<Point> v (x.size());
 	vector<int> ret;
 
 	for (int i=0;i<x.size();i++) v[i] = Point(x[i], y[i], i);
 	sort(v.begin(), v.end(), acompare);
+	ret.push_back (v[0].id);
 	
 	
-	ret.push_back ( v[0].id);
-	
-	int second_point;
-	double min_angle=10;
 	
 	for (int j=0;j<x.size();j++) {
 		if (j==v[0].id) continue;
 		double angle = atan2 (y[j]-v[0].y, x[j]-v[0].x);
-		while (angle<0) angle+=PI;
+		if (angle<0) angle += 2*PI;
 		if (angle<min_angle) {
 			min_angle = angle;
 			second_point = j;
@@ -68,31 +67,31 @@ vector <int> NoRightTurnDiv2::findPath(vector <int> x, vector <int> y) {
 	
 	ret.push_back (second_point);
 	
-	int visited [55];
 	for (int i=0;i<55;i++) visited[i] = 0;
 	visited[v[0].id] = visited[second_point] = 1;
-	int rem = x.size()-2;
+	rem = x.size()-2;
 	
-	double angle = atan2 (y[ret[1]]-y[ret[0]], x[ret[1]]-x[ret[0]]), new_angle_saved;
-	int prevx=x[ret[1]], prevy=y[ret[1]];
+	prev_angle = min_angle;
+	prevx=x[ret[1]]; prevy=y[ret[1]];
 	while (rem>0) {
 		rem--;
-		double min_diff = 10, new_angle;
+		double min_diff = 10, new_angle=-1;
 		int next_point;
+		
 		for (int j=0;j<x.size();j++) {
-			if (visited[j]) continue;
-			
+			if (visited[j]) continue;	
 			new_angle = atan2 (y[j]-prevy, x[j]-prevx);
-			if (new_angle<0) new_angle = 2*PI+new_angle; //convert to pops
-			double nn = new_angle<angle? 2*PI+new_angle-angle :new_angle-angle;
-			if (nn>PI) continue;
+			if (new_angle<0) new_angle += 2*PI; //convert to pops
+			double nn = (new_angle<prev_angle)? 2*PI+new_angle-prev_angle :new_angle-prev_angle;
+			
+			if (nn>PI) continue; //Clockwise
 			if (nn<min_diff) {
 				min_diff = nn;
 				next_point = j;
-				new_angle_saved = new_angle;
+				angle = new_angle;
 			}
 		}
-		angle = new_angle_saved;
+		prev_angle = angle;
 		visited[next_point] = 1;
 		ret.push_back (next_point);
 		prevx = x[next_point];
@@ -100,4 +99,6 @@ vector <int> NoRightTurnDiv2::findPath(vector <int> x, vector <int> y) {
 	}
 	return ret;
 }
+
+
 //Powered by [KawigiEdit] 2.0!
